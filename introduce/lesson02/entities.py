@@ -5,6 +5,13 @@ from dataclasses import dataclass
 class DXFEntity:
     ...
 
+    def to_tuple(self):
+        return ()
+
+    def to_dict(self):
+        return {}
+
+
 @dataclass
 class Point(DXFEntity):
     x: float

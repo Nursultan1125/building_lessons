@@ -81,6 +81,11 @@ class E3DFaceParser(DXFEntityParser):
 
 class DXFParser:
     dxf_lines: list[str] = []
+    entities: dict[str, list[DXFEntity]] = {
+        "POINT": [],
+        "LINE": [],
+        "3DFACE": []
+    }
 
     INCLUDED_ENTITIES = ["POINT", "LINE", "3DFACE"]
 
@@ -95,12 +100,8 @@ class DXFParser:
             self.dxf_lines = f.readlines()
             f.close()
 
-    def parse(self):
-        entities = {
-            "POINT": [],
-            "LINE": [],
-            "3DFACE": []
-        }
+    def parse(self) -> dict[str, list[DXFEntity]]:
+
         in_entities_section = False
         for i, line in enumerate(self.dxf_lines):
             line = line.strip()
@@ -116,13 +117,15 @@ class DXFParser:
             if parser is None:
                 continue
             entity = parser.parse(i, self.dxf_lines)
-            entities[line].append(entity)
-        for k, v in entities.items():
-            print(f"Entities of type {k}:")
-            for entity in v:
-                print("    ", entity.to_tuple())
+            self.entities[line].append(entity)
+        return self.entities
 
 
 if __name__ == '__main__':
     parser = DXFParser("data/drawing1.dxf")
-    parser.parse()
+    entities = parser.parse()
+    for k, v in entities.items():
+        print(f"Entities of type {k}:")
+        for entity in v:
+            print("    ", entity.to_tuple())
+

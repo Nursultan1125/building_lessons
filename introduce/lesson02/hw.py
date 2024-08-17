@@ -1,4 +1,9 @@
 from introduce.lesson02.dxf_parser import DXFParser
 
 parser = DXFParser("data/drawing1.dxf")
-parser.parse()
+entities = parser.parse()
+
+for k, v in entities.items():
+    print(f"Entities of type {k}:")
+    for entity in v:
+        print("    ", entity.to_tuple())
