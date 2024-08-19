@@ -7,7 +7,7 @@ from introduce.lesson03.consts import TEMPLATE
 
 
 @dataclass
-class Lira:
+class LiraExporter:
     points: list[Point]
     lines: list[Line]
     e3d_faces: list[E3DFace]
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser = DXFParser("data/Check-To-Tolerance.dxf")
     # parser = DXFParser("../lesson02/data/hw.dxf")
     entities = parser.parse()
-    lira = Lira(
+    lira = LiraExporter(
         points=entities["POINT"],
         lines=entities["LINE"],
         e3d_faces=entities["3DFACE"]
