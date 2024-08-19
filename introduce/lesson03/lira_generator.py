@@ -69,7 +69,7 @@ if __name__ == "__main__":
     )
     print(len(lira.all_points))
     print(len(lira.unique_points))
-    lira.write_to_file("data/Check-To-Tolerance-out.txt")
+    lira.write_to_file("data/Check-To-Tolerance----out.txt")
     # for i, k in enumerate(lira.unique_points.keys()):
     #     print(i, k)
     #     assert k == i + 1
