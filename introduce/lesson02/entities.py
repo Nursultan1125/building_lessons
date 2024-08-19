@@ -17,7 +17,7 @@ class Point(DXFEntity):
     x: float
     y: float
     z: float
-    accuracy: float = 0.0
+    accuracy: float = 0.05
 
     def __eq__(self, other: Point):
         return (

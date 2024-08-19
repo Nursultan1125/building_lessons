@@ -1,6 +1,6 @@
 from introduce.lesson02.dxf_parser import DXFParser
 
-parser = DXFParser("data/drawing1.dxf")
+parser = DXFParser("data/hw.dxf")
 entities = parser.parse()
 
 for k, v in entities.items():

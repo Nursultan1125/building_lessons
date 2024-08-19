@@ -1,4 +1,13 @@
+from dataclasses import dataclass, field
+
 from introduce.lesson02.entities import E3DFace, Point, Line, DXFEntity
+
+
+@dataclass
+class Entities:
+    points: list[Point] = field(default_factory=list)
+    lines: list[Line] = field(default_factory=list)
+    e3d_faces: list[E3DFace] = field(default_factory=list)
 
 
 class DXFEntityParser:
@@ -81,7 +90,7 @@ class E3DFaceParser(DXFEntityParser):
 
 class DXFParser:
     dxf_lines: list[str] = []
-    entities: dict[str, list[DXFEntity]] = {
+    entities: dict[str, list[DXFEntity | Point | Line | E3DFace]] = {
         "POINT": [],
         "LINE": [],
         "3DFACE": []
@@ -100,7 +109,7 @@ class DXFParser:
             self.dxf_lines = f.readlines()
             f.close()
 
-    def parse(self) -> dict[str, list[DXFEntity]]:
+    def parse(self) -> dict[str, list[DXFEntity | Point | Line | E3DFace]]:
 
         in_entities_section = False
         for i, line in enumerate(self.dxf_lines):
@@ -122,7 +131,7 @@ class DXFParser:
 
 
 if __name__ == '__main__':
-    parser = DXFParser("data/drawing1.dxf")
+    parser = DXFParser("data/test.dxf")
     entities = parser.parse()
     for k, v in entities.items():
         print(f"Entities of type {k}:")
