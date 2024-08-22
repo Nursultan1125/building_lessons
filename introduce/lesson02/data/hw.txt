@@ -1,0 +1,12 @@
+Entities of type POINT:
+    (1165.047245869325, 966.3272066150829, 0.0, Layer(name='HW-2', unique_name='HW-2', type=1))
+    (1535.472522368154, 733.4272844660981, 0.0, Layer(name='0', unique_name='0', type=1))
+    (1294.496941659901, 460.7154053813792, 0.0, Layer(name='0', unique_name='0', type=1))
+    (880.2579185502381, 558.2546919126889, 0.0, Layer(name='0', unique_name='0', type=1))
+Entities of type LINE:
+    ((1149.114970487912, 1047.941707922487, 0.0, Layer(name='HW-2', unique_name='HW-2', type=1)), (778.6896939890821, 538.3487154861654, 0.0, Layer(name='HW-2', unique_name='HW-2', type=1)), Layer(name='HW-2', unique_name='HW-2', type=1))
+    ((778.6896939890821, 538.3487154861654, 0.0, Layer(name='HW-2', unique_name='HW-2', type=1)), (1288.522335185453, 393.0350855311985, 0.0, Layer(name='HW-2', unique_name='HW-2', type=1)), Layer(name='HW-2', unique_name='HW-2', type=1))
+    ((1288.522335185453, 393.0350855311985, 0.0, Layer(name='HW-2', unique_name='HW-2', type=1)), (1623.100007039378, 753.3332608926221, 0.0, Layer(name='HW-2', unique_name='HW-2', type=1)), Layer(name='HW-2', unique_name='HW-2', type=1))
+    ((1623.100007039378, 753.3332608926221, 0.0, Layer(name='HW-2', unique_name='HW-2', type=1)), (1149.114970487912, 1047.941707922487, 0.0, Layer(name='HW-2', unique_name='HW-2', type=1)), Layer(name='HW-2', unique_name='HW-2', type=1))
+Entities of type 3DFACE:
+    ((1939.75387657085, 1225.104900159891, 0.0, Layer(name='HW-2', unique_name='HW-2', type=2)), (2722.42664068786, 1225.104900159891, 0.0, Layer(name='HW-2', unique_name='HW-2', type=2)), (2722.42664068786, 860.8255335958501, 0.0, Layer(name='HW-2', unique_name='HW-2', type=2)), (1967.635347800269, 860.8255335958503, 0.0, Layer(name='HW-2', unique_name='HW-2', type=2)))

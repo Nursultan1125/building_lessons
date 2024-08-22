@@ -2,9 +2,7 @@ TEMPLATE = """
 (0/1;csv2lira/2;5/39; 1:'dead load';)(1/
 {drawing_objects}
 )(3/
-1 S0 3.06E6 20.0 30.0/
-2 S0 3.06E6 20.0 20.0/
-3 3.06E6 0.2 0.10/
+{layers}
 
 (4/
 {unique_points}

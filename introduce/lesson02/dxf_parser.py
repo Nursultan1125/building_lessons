@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from introduce.lesson02.entities import E3DFace, Point, Line, DXFEntity
+from introduce.lesson02.entities import E3DFace, Point, Line, DXFEntity, Layer, EntityType
 
 
 @dataclass
@@ -12,6 +12,7 @@ class Entities:
 
 class DXFEntityParser:
     POINT_MAP = {
+        "8": "layer",
         "10": "x",
         "20": "y",
         "30": "z",
@@ -42,9 +43,12 @@ class PointParser(DXFEntityParser):
             next_line = dxf_lines[number + 1].strip()
 
             coordinate = self.POINT_MAP.get(dxf_line, None)
+            if coordinate == "layer":
+                coordinates[coordinate] = Layer(name=next_line, type=EntityType.LINE)
+                continue
             if coordinate:
                 coordinates[coordinate] = float(next_line)
-            if len(coordinates) == 3:
+            if len(coordinates) == 4:
                 break
         return Point(**coordinates)
 
@@ -54,6 +58,7 @@ class LineParser(DXFEntityParser):
     def parse(self, index_line: int, dxf_lines: list[str]) -> Line:
         start_coordinates = {}
         end_coordinates = {}
+        layer = Layer(name="0", type=EntityType.LINE)
         for i in range(index_line + 1, len(dxf_lines)):
             dxf_line = dxf_lines[i].strip()
             next_line = dxf_lines[i + 1].strip()
@@ -66,9 +71,15 @@ class LineParser(DXFEntityParser):
                 coordinate = self.POINT_MAP.get(dxf_line, None)
                 if coordinate:
                     end_coordinates[coordinate] = float(next_line)
+            elif dxf_line == "8":
+                layer = Layer(name=next_line, type=EntityType.LINE)
             if len(start_coordinates) + len(end_coordinates) == 6:
                 break
-        return Line(start=Point(**start_coordinates), end=Point(**end_coordinates))
+        return Line(
+            start=Point(layer=layer, **start_coordinates),
+            end=Point(layer=layer, **end_coordinates),
+            layer=layer,
+        )
 
 
 class E3DFaceParser(DXFEntityParser):
@@ -76,16 +87,21 @@ class E3DFaceParser(DXFEntityParser):
 
     def parse(self, index_line: int, dxf_lines: list[str]) -> E3DFace:
         points = {}
+        layer = Layer(name="0", type=EntityType.E3DFACE)
         for i in range(index_line + 1, len(dxf_lines)):
             dxf_line = dxf_lines[i].strip()
             next_line = dxf_lines[i + 1].strip()
             coordinate = self.POINT_MAP.get(dxf_line, None)
+            if coordinate == "layer":
+                layer = Layer(name=next_line, type=EntityType.E3DFACE)
+                continue
             if coordinate:
                 points.setdefault(f"{dxf_line[1]}", {})[coordinate] = float(next_line)
-            if len(points) == self.E3DFACE_POINT_COUNT and all([len(c) == 3 for c in points.values()]):
+                points.setdefault(f"{dxf_line[1]}", {})["layer"] = layer
+            if len(points) == self.E3DFACE_POINT_COUNT and all([len(c) == 4 for c in points.values()]):
                 break
 
-        return E3DFace(points=[Point(**coordinates) for coordinates in points.values()])
+        return E3DFace(points=[Point(**coordinates) for coordinates in points.values()], layer=layer)
 
 
 class DXFParser:
