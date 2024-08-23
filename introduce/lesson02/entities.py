@@ -26,10 +26,10 @@ class Layer:
     unique_name: str | None = None
     type: EntityType | None = EntityType.POINT
 
-    LINE_LAYER_PATTERN = re.compile("B\s*(\d+)\s*H\s*(\d+)")
+    LINE_LAYER_PATTERN = re.compile("B+\d+\s+H+\d+")
     E3DFACE_LAYER_PATTERN = re.compile("B\s*(\d+)\s*H\s*(\d+)")
     LAYER_PATTERN = re.compile("B+\d+\s+H+\d+")
-    LINE_NUMBER_PATTERN = re.compile("H\s*(\d+)")
+    LINE_NUMBER_PATTERN = re.compile("B\s*(\d+)\s*H\s*(\d+)")
     E3DFACE_NUMBER_PATTERN = re.compile("H\s*(\d+)")
 
     def __post_init__(self):
