@@ -26,18 +26,27 @@ class Layer:
     unique_name: str | None = None
     type: EntityType | None = EntityType.POINT
 
-    LINE_LAYER_PATTERN = re.compile("B+\d+\s+H+\d+")
-    E3DFACE_LAYER_PATTERN = re.compile("B\s*(\d+)\s*H\s*(\d+)")
-    LAYER_PATTERN = re.compile("B+\d+\s+H+\d+")
+    LINE_LAYER_PATTERN = re.compile("\sB+\d+\s+H+\d+")
+    E3DFACE_LAYER_PATTERN = re.compile("\sH\s*(\d+)")
+
     LINE_NUMBER_PATTERN = re.compile("B\s*(\d+)\s*H\s*(\d+)")
     E3DFACE_NUMBER_PATTERN = re.compile("H\s*(\d+)")
 
     def __post_init__(self):
-        if self.is_valid():
-            self.unique_name = " ".join([str(float(i)) for i in self.LINE_NUMBER_PATTERN.findall(self.name)[0]])
+        if not self.is_valid():
+            self.unique_name = self.name
             return
+        if self.type == EntityType.LINE:
+            self.unique_name = " ".join([str(float(i)) for i in self.LINE_NUMBER_PATTERN.findall(self.name)[0]])
+        elif self.type == EntityType.E3DFACE:
+            self.unique_name = " ".join([str(int(i) / 100) for i in self.E3DFACE_NUMBER_PATTERN.findall(self.name)])
 
-        self.unique_name = self.name
+    def to_lira_format(self, index: int):
+        if self.type == EntityType.LINE:
+            return f"{index} S0 3.06E6 {self.unique_name}/\n"
+        elif self.type == EntityType.E3DFACE:
+            return f"{index} 3.06E6 0.2 {self.unique_name}/\n"
+        return ""
 
     def __str__(self):
         return f"Layer({self.name})"
@@ -68,11 +77,11 @@ class Point(DXFEntity):
                 and abs(self.z - other.z) <= self.accuracy
         )
 
+    def __hash__(self):
+        return hash((self.x, self.y, self.z, self.layer))
+
     def to_tuple(self):
         return (self.x, self.y, self.z, self.layer)
-
-    def __hash__(self):
-        return hash((self.x, self.y, self.z))
 
     def to_dict(self):
         return {

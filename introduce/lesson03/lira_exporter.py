@@ -6,6 +6,12 @@ from introduce.lesson02.dxf_parser import DXFParser
 from introduce.lesson02.entities import Point, Line, E3DFace, Layer
 from introduce.lesson03.consts import TEMPLATE
 
+START = "(0/1;csv2lira/2;5/39; 1:'dead load';)(1/\n"
+END = """)(6/1 16 3 1 1/)
+(7/1 0.0 0.0 0.0 0.0 /)
+(8/0 0 0 0 0 0 0/)
+"""
+
 
 @dataclass
 class LiraExporter:
@@ -26,23 +32,17 @@ class LiraExporter:
         return self.points + points
 
     @cached_property
-    def unique_points(self) -> dict[int, Point]:
+    def unique_points(self) -> dict[Point, int]:
         points = self.all_points
-        unique_points = []
-        for point in points:
-            if point not in unique_points:
-                unique_points.append(point)
+        unique_points = set(points)
 
         res = {}
         for i, point in enumerate(unique_points):
-            res[i + 1] = point
+            res[point] = i + 1
         return res
 
     def get_index(self, point: Point):
-        indexes = self.unique_points
-        for index, p in indexes.items():
-            if p == point:
-                return index
+        return self.unique_points[point]
 
     def filter_by_layer_template(self):
         self.points = [p for p in self.points if p.layer.is_valid()]
@@ -54,7 +54,7 @@ class LiraExporter:
 
     @cached_property
     def layers(self):
-        layers = list({p.layer for p in self.unique_points.values()})
+        layers = list({p.layer for p in self.unique_points.keys()})
         return {l: i + 1 for i, l in enumerate(layers)}
 
     def get_layer_index(self, layer: Layer):
@@ -70,21 +70,65 @@ class LiraExporter:
             )
         return results
 
+    def get_converted_e3d_faces(self):
+        results = ""
+        for face in self.e3d_faces:
+            points = [str(self.get_index(p)) for p in face.points]
+            results += "44 {layer} {points}/\n".format(
+                layer=self.get_layer_index(face.layer),
+                points=" ".join(points),
+            )
+        return results
+
     def export(self, filename) -> None:
         with open(filename, "w") as file:
             unique_points = ""
             drawing_objects = self.get_converted_lines()
+            drawing_objects += "\n" + self.get_converted_e3d_faces()
             layers = ""
             for layer, i in self.layers.items():
-                layers += f"{i} S0 3.06E6 {layer.unique_name}/\n"
-            for point in self.unique_points.values():
+                layers += layer.to_lira_format(i)
+            for point in self.unique_points.keys():
                 unique_points += f"{point.x} {point.y} {point.z}/\n"
             file.write(TEMPLATE.format(unique_points=unique_points, drawing_objects=drawing_objects, layers=layers))
 
+    def export_partial(self, filename):
+        """(0/1;csv2lira/2;5/39; 1:'dead load';)(1/
+        {drawing_objects}
+        )(3/
+        {layers}
+        (4/
+        {unique_points}
+        )(6/1 16 3 1 1/)
+        (7/1 0.0 0.0 0.0 0.0 /)
+        (8/0 0 0 0 0 0 0/)
+        """
+        with open(filename, "w") as file:
+            file.write(START)
+            for line in self.lines:
+                file.write("5 {layer} {start} {end}/\n".format(
+                    start=self.get_index(line.start),
+                    end=self.get_index(line.end),
+                    layer=self.get_layer_index(line.layer)
+                ))
+            for face in self.e3d_faces:
+                points = [str(self.get_index(p)) for p in face.points]
+                file.write("44 {layer} {points}/\n".format(
+                    layer=self.get_layer_index(face.layer),
+                    points=" ".join(points),
+                ))
+            file.write(")(3/\n")
+            for layer, i in self.layers.items():
+                file.write(layer.to_lira_format(i))
+            file.write(")(4/\n")
+            for point in self.unique_points.keys():
+                file.write(f"{point.x} {point.y} {point.z}/\n")
+            file.write(END)
 
 if __name__ == "__main__":
     print("Parsing DXF")
     from datetime import datetime
+
     print(datetime.now())
     parser = DXFParser("data/lira_color11.dxf")
     # parser = DXFParser("data/DZ_6-exp4.dxf")
@@ -103,7 +147,7 @@ if __name__ == "__main__":
     lira.filter_by_layer_template()
     print(datetime.now())
     print("writing output")
-    lira.export("data/lira_color--out00.txt")
+    lira.export_partial("data/lira_color11-out.txt")
     print(datetime.now())
     print("Done")
     # print(len(lira.all_points))
