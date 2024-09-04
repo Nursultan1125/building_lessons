@@ -57,6 +57,20 @@ class LiraExporter:
         layers = list({p.layer for p in self.unique_points.keys()})
         return {l: i + 1 for i, l in enumerate(layers)}
 
+    def convert_3d_face(self, face: E3DFace):
+        face_type = 42 if face.is_triangle() else 44
+        if face_type == 42:
+            exported_points = [str(self.get_index(p)) for p in set(face.points)]
+        else:
+            exported_points = [
+                str(self.get_index(p)) for p in [face.points[0], face.points[1], face.points[3], face.points[2]]
+            ]
+        return "{face_type} {layer} {points}/\n".format(
+            face_type=face_type,
+            layer=self.get_layer_index(face.layer),
+            points=" ".join(exported_points),
+        )
+
     def get_layer_index(self, layer: Layer):
         return self.layers[layer]
 
@@ -112,11 +126,7 @@ class LiraExporter:
                     layer=self.get_layer_index(line.layer)
                 ))
             for face in self.e3d_faces:
-                points = [str(self.get_index(p)) for p in face.points]
-                file.write("44 {layer} {points}/\n".format(
-                    layer=self.get_layer_index(face.layer),
-                    points=" ".join(points),
-                ))
+                file.write(self.convert_3d_face(face))
             file.write(")(3/\n")
             for layer, i in self.layers.items():
                 file.write(layer.to_lira_format(i))
@@ -124,6 +134,7 @@ class LiraExporter:
             for point in self.unique_points.keys():
                 file.write(f"{point.x} {point.y} {point.z}/\n")
             file.write(END)
+
 
 if __name__ == "__main__":
     print("Parsing DXF")
@@ -147,7 +158,7 @@ if __name__ == "__main__":
     lira.filter_by_layer_template()
     print(datetime.now())
     print("writing output")
-    lira.export_partial("data/lira_color11-out.txt")
+    lira.export_partial("data/lira_color11.txt")
     print(datetime.now())
     print("Done")
     # print(len(lira.all_points))

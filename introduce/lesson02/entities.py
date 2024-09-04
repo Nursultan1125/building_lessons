@@ -78,7 +78,10 @@ class Point(DXFEntity):
         )
 
     def __hash__(self):
-        return hash((self.x, self.y, self.z, self.layer))
+        return hash((self.to_tolerance(self.x), self.to_tolerance(self.y), self.to_tolerance(self.z)))
+
+    def to_tolerance(self, value: float):
+        return round(value / self.accuracy) * self.accuracy
 
     def to_tuple(self):
         return (self.x, self.y, self.z, self.layer)
@@ -115,3 +118,6 @@ class E3DFace(DXFEntity):
 
     def to_tuple(self):
         return tuple([point.to_tuple() for point in self.points])
+
+    def is_triangle(self):
+        return len(set(self.points)) == 3
