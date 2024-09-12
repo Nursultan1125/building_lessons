@@ -44,7 +44,7 @@ class PointParser(DXFEntityParser):
 
             coordinate = self.POINT_MAP.get(dxf_line, None)
             if coordinate == "layer":
-                coordinates[coordinate] = Layer(name=next_line, type=EntityType.LINE)
+                coordinates[coordinate] = Layer(name=next_line, type=EntityType.POINT)
                 continue
             if coordinate:
                 coordinates[coordinate] = float(next_line)

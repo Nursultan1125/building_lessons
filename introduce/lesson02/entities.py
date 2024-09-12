@@ -31,6 +31,8 @@ class Layer:
 
     LINE_NUMBER_PATTERN = re.compile("B\s*(\d+)\s*H\s*(\d+)")
     E3DFACE_NUMBER_PATTERN = re.compile("H\s*(\d+)")
+    # POINT_LAYER_PATTERN = re.compile(r"DOF\b(?:\s+x)?(?:\s+y)?(?:\s+z)?(?:\s+fx)?(?:\s+fy)?(?:\s+fz)?\b")
+    POINT_LAYER_PATTERN = re.compile(r"DOF\b(?:\s+x)?(?:\s+y)?(?:\s+z)?(?:\s+fx)?(?:\s+fy)?(?:\s+fz)?\s*$")
 
     def __post_init__(self):
         if not self.is_valid():
@@ -40,6 +42,9 @@ class Layer:
             self.unique_name = " ".join([str(float(i)) for i in self.LINE_NUMBER_PATTERN.findall(self.name)[0]])
         elif self.type == EntityType.E3DFACE:
             self.unique_name = " ".join([str(int(i) / 100) for i in self.E3DFACE_NUMBER_PATTERN.findall(self.name)])
+        elif self.type == EntityType.POINT:
+            self.unique_name = self.POINT_LAYER_PATTERN.findall(self.name)[0]
+            self.unique_name = self.unique_name.replace("DOF", "").strip()
 
     def to_lira_format(self, index: int):
         if self.type == EntityType.LINE:
@@ -56,6 +61,16 @@ class Layer:
             return bool(self.LINE_LAYER_PATTERN.findall(self.name))
         elif self.type == EntityType.E3DFACE:
             return bool(self.E3DFACE_LAYER_PATTERN.findall(self.name))
+        elif self.type == EntityType.POINT:
+
+            CLEANUP_PATTERN = re.compile(r"DOF|x|y|z|fx|fy|fz")
+            p_name = self.POINT_LAYER_PATTERN.findall(self.name)
+            cleaned_name = CLEANUP_PATTERN.findall(self.name)
+            cleaned_name = " ".join(cleaned_name)
+            if not p_name:
+                return False
+            p_name = p_name[0]
+            return bool(len(cleaned_name) == len(p_name))
         return True
 
     def __hash__(self):

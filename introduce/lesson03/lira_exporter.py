@@ -133,6 +133,16 @@ class LiraExporter:
             file.write(")(4/\n")
             for point in self.unique_points.keys():
                 file.write(f"{point.x} {point.y} {point.z}/\n")
+            file.write(")(5/\n")
+            for point in self.points:
+                dof = point.layer.unique_name.replace("fx","4")
+                dof = dof.replace("fy", "5")
+                dof = dof.replace("fz", "6")
+                dof = dof.replace("x", "1")
+                dof = dof.replace("y", "2")
+                dof = dof.replace("z", "3")
+
+                file.write(f"{self.get_index(point)} {dof}/\n")
             file.write(END)
 
 
@@ -141,7 +151,7 @@ if __name__ == "__main__":
     from datetime import datetime
 
     print(datetime.now())
-    parser = DXFParser("data/lira_color11.dxf")
+    parser = DXFParser("data/POINTS.dxf")
     # parser = DXFParser("data/DZ_6-exp4.dxf")
     # parser = DXFParser("../lesson02/data/hw.dxf")
     entities = parser.parse()
@@ -158,7 +168,7 @@ if __name__ == "__main__":
     lira.filter_by_layer_template()
     print(datetime.now())
     print("writing output")
-    lira.export_partial("data/lira_color11.txt")
+    lira.export_partial("data/POINTS2.txt")
     print(datetime.now())
     print("Done")
     # print(len(lira.all_points))
