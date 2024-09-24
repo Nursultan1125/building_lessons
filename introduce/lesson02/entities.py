@@ -26,7 +26,7 @@ class Layer:
     unique_name: str | None = None
     type: EntityType | None = EntityType.POINT
 
-    LINE_LAYER_PATTERN = re.compile("\sB+\d+\s+H+\d+")
+    LINE_LAYER_PATTERN = re.compile("B+\d+\s+H+\d+")
     E3DFACE_LAYER_PATTERN = re.compile("\sH\s*(\d+)")
 
     LINE_NUMBER_PATTERN = re.compile("B\s*(\d+)\s*H\s*(\d+)")
@@ -55,6 +55,9 @@ class Layer:
 
     def __str__(self):
         return f"Layer({self.name})"
+
+    def is_dof_valid(self) -> bool:
+        return bool(self.POINT_LAYER_PATTERN.findall(self.name))
 
     def is_valid(self) -> bool:
         if self.type == EntityType.LINE:
@@ -99,7 +102,7 @@ class Point(DXFEntity):
         return round(value / self.accuracy) * self.accuracy
 
     def to_tuple(self):
-        return (self.x, self.y, self.z, self.layer)
+        return (self.x, self.y, self.z)
 
     def to_dict(self):
         return {
