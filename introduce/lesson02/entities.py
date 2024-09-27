@@ -27,7 +27,7 @@ class Layer:
     type: EntityType | None = EntityType.POINT
 
     LINE_LAYER_PATTERN = re.compile("B+\d+\s+H+\d+")
-    E3DFACE_LAYER_PATTERN = re.compile("\sH\s*(\d+)")
+    E3DFACE_LAYER_PATTERN = re.compile("H\s*(\d+)")
 
     LINE_NUMBER_PATTERN = re.compile("B\s*(\d+)\s*H\s*(\d+)")
     E3DFACE_NUMBER_PATTERN = re.compile("H\s*(\d+)")

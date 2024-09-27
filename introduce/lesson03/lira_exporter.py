@@ -4,7 +4,8 @@ from functools import cached_property
 from introduce.lesson02.dxf_parser import DXFParser
 from introduce.lesson02.entities import Point, Line, E3DFace, Layer
 from introduce.lesson03.consts import TEMPLATE
-from introduce.lesson03.dof_calc import get_dof_points_from_lines_by_dof_lines
+from introduce.lesson03.dof_calc import get_dof_points_from_lines_by_dof_lines, get_dof_points_from_with_dof_3d_faces, \
+    get_dof_points_from_lines_with_dof_3d_faces, get_dof_points_from_faces_by_dof_lines
 
 START = "(0/1;csv2lira/2;5/39; 1:'dead load';)(1/\n"
 END = """)(6/1 16 3 1 1/)
@@ -19,6 +20,7 @@ class LiraExporter:
     lines: list[Line]
     e3d_faces: list[E3DFace]
     dof_lines: list[Line] = field(default_factory=list)
+    dof_3dfaces: list[E3DFace] = field(default_factory=list)
 
     @cached_property
     def all_points(self) -> list[Point]:
@@ -49,6 +51,7 @@ class LiraExporter:
         self.points = [p for p in self.points if p.layer.is_valid()]
         self.dof_lines = [l for l in self.lines if l.layer.is_dof_valid()]
         self.lines = [l for l in self.lines if l.layer.is_valid()]
+        self.dof_3dfaces = [f for f in self.e3d_faces if f.layer.is_dof_valid()]
         self.e3d_faces = [f for f in self.e3d_faces if f.layer.is_valid()]
         self.__dict__.pop("all_points", None)  # clear cache
         self.__dict__.pop("unique_points", None)  # clear cache
@@ -110,6 +113,9 @@ class LiraExporter:
 
     def calculate_dof_points(self):
         self.points += get_dof_points_from_lines_by_dof_lines(self.lines, self.dof_lines)
+        self.points += get_dof_points_from_faces_by_dof_lines(self.e3d_faces, self.dof_lines)
+        self.points += get_dof_points_from_with_dof_3d_faces(self.e3d_faces, self.dof_3dfaces)
+        self.points += get_dof_points_from_lines_with_dof_3d_faces(self.lines, self.dof_3dfaces)
 
     def _write_dof(self, file):
         file.write(")(5/\n")
@@ -159,7 +165,7 @@ if __name__ == "__main__":
     from datetime import datetime
 
     print(datetime.now())
-    parser = DXFParser("data1/LinesCrossRoads.dxf")
+    parser = DXFParser("data1/LinesCrossRoadsWith3Dfaces.dxf")
     # parser = DXFParser("data/DZ_6-exp4.dxf")
     # parser = DXFParser("../lesson02/data/hw.dxf")
     entities = parser.parse()
@@ -174,10 +180,12 @@ if __name__ == "__main__":
     print(datetime.now())
     print("Filtering")
     lira.filter_by_layer_template()
+    print(datetime.now())
+    print("Calculating")
     lira.calculate_dof_points()
     print(datetime.now())
     print("writing output")
-    lira.export_partial("data1/LinesCrossRoads.txt")
+    lira.export_partial("data1/LinesCrossRoadsWith3Dfaces.txt")
     print(datetime.now())
     print("Done")
     # print(len(lira.all_points))
